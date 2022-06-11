@@ -1,6 +1,9 @@
 # JEXPRESSO
 JEXPRESSO
 
+MINIMAL CODE FOR DISCOURSE.JULIA.ORG
+https://discourse.julialang.org/t/unexpected-allocation-at-each-loop-iteration/82600
+
 # Some notes on using JEXPRESSO
 
 To install and run the code assume Julia
@@ -19,28 +22,3 @@ julia --project=. $JEXPRESSO_HOME/src/jexpresso.jl
 ```
 
 where `$JEXPRESSO_HOME` is your path to the base JEXPRESSO directory (you can export it in your .bashrc or simply replace its value with the explicit name of the path)
-
-
-## Problems building MPI.jl
-
-If you are having problems building MPI.jl then most likely you need to set the
-environment variable `JULIA_MPI_PATH`. Additionally, if your MPI is not
-installed in a single place, e.g., MPI from macports in OSX, you may need to set
-`JULIA_MPI_INCLUDE_PATH` and `JULIA_MPI_LIBRARY_PATH`; for macports installs of
-MPI these would be subdirectories in `/opt/local/include` and `/opt/local/lib`.
-
-## Setup with GPUs
-
-```bash
-julia --project=$JEXPRESSO_HOME/env/gpu -e "using Pkg; Pkg.instantiate(); Pkg.API.precompile()"
-```
-
-where `$JEXPRESSO_HOME` is the path to the base JEXPRESSO directory
-
-
-You can test that things were installed properly with
-```bash
-julia --project=$JEXPRESSO_HOME/env/gpu $JEXPRESSO_HOME/test/runtests.jl
-```
-
-[0]: https://github.com/JuliaParallel/MPI.jl

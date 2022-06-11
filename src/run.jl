@@ -21,9 +21,9 @@ const TFloat = Float64
 # jexpresso modules
 #--------------------------------------------------------
 include("./IO/mod_inputs.jl")
-include("./Mesh/mod_mesh.jl")
+include("./Mesh/mod_mesh_minimal.jl")
 include("./basis/basis_structs.jl")
-include("./solver/mod_solution.jl")
+#include("./solver/mod_solution.jl")
 #--------------------------------------------------------
 
 struct EDGES <:At_geo_entity end
@@ -43,7 +43,6 @@ inputs, nvars = mod_inputs_user_inputs()
 #--------------------------------------------------------
 # Build mesh    
 #--------------------------------------------------------
-
 if (haskey(inputs, :lread_gmsh) && inputs[:lread_gmsh]==true)
     
     println(" # Read gmsh grid and populate with high-order points ")
@@ -52,8 +51,7 @@ if (haskey(inputs, :lread_gmsh) && inputs[:lread_gmsh]==true)
     mesh = St_mesh{TInt,TFloat}(nsd=Int8(inputs[:nsd]),
                                 nop=Int8(inputs[:nop]))
     
-    # Read gmsh grid using the GridapGmsh reader
-    
+    # Read gmsh grid using the GridapGmsh reader    
     mod_mesh_read_gmsh!(mesh, inputs[:gmsh_filename])
     
     println(" # Read gmsh grid and populate with high-order points ........................ DONE")
