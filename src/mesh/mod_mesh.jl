@@ -31,7 +31,6 @@ const FACE_NODES   = UInt8(4)
 
 abstract type At_geo_entity end
 
-
 include("../basis/basis_structs.jl")
 
 Base.@kwdef mutable struct St_mesh{TInt, TFloat}
@@ -266,7 +265,7 @@ populate_conn_face_el!(mesh)
 #Volume
 @time add_high_order_nodes_volumes!(mesh, lgl)
 
-writevtk(model,"gmsh_grid")
+#writevtk(model,"gmsh_grid")
 end
 
 function populate_conn_edge_el!(mesh::St_mesh)
