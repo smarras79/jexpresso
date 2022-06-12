@@ -93,8 +93,6 @@ Base.@kwdef mutable struct St_mesh{TInt, TFloat}
     conn_ho           = ElasticArray{Int64}(undef, ngl*nelem)
     conn_unique_edges = ElasticArray{Int64}(undef,  1, 2)
     conn_unique_faces = ElasticArray{Int64}(undef,  1, 4)
-
-    conn_face_L2G     = ElasticArray{Int64}(undef, 1, NFACES_EL, nelem)
     
     conn_edge_el      = ElasticArray{Int64}(undef, 2, NEDGES_EL, nelem)
     conn_face_el      = ElasticArray{Int64}(undef, 4, NFACES_EL, nelem)
@@ -141,9 +139,6 @@ function mod_mesh_read_gmsh!(mesh::St_mesh, gmsh_filename::String)
         error( " WRONG NSD: This is not theoretical physics: we only handle 1, 2, or 3 dimensions!")
     end
     
-    #@info topology.vertex_coordinates
-    
-    #dump(topology)
     #
     # Mesh elements, nodes, faces, edges
     #
@@ -199,9 +194,6 @@ function mod_mesh_read_gmsh!(mesh::St_mesh, gmsh_filename::String)
     resize!(mesh.y, (mesh.npoin_linear))
     resize!(mesh.z, (mesh.npoin_linear))
 
-#    resize!(mesh.conn_edge_L2G, (1, mesh.NEDGES_EL, mesh.nelem))
-#    resize!(mesh.conn_face_L2G, (1, mesh.NFACES_EL, mesh.nelem))
-    
     resize!(mesh.conn_edge_el,  (2, mesh.NEDGES_EL, mesh.nelem))
     resize!(mesh.conn_face_el,  (4, mesh.NFACES_EL, mesh.nelem))
 
@@ -215,8 +207,8 @@ function mod_mesh_read_gmsh!(mesh::St_mesh, gmsh_filename::String)
     mesh.cell_node_ids     = model.grid.cell_node_ids
     mesh.conn_unique_faces = get_face_nodes(model, FACE) #faces --> 4 nodes
     mesh.conn_unique_edges = get_face_nodes(model, EDGE) #edges --> 2 nodes
-    mesh.cell_edge_ids     = get_faces(topology, 3, 1)   #edge map from local to global numbering i.e. iedge_g = cell_edge_ids[1:NELEM][1:NEDGES_EL]
-    mesh.cell_face_ids     = get_faces(topology, 3, 2)   #edge map from local to global numbering i.e. iface_g = cell_face_ids[1:NELEM][1:NFACE_EL]
+    mesh.cell_edge_ids     = get_faces(topology, 3, 1)   #map local/global edge i.e. iedge_g = cell_edge_ids[1:NELEM][1:NEDGES_EL]
+    mesh.cell_face_ids     = get_faces(topology, 3, 2)   #map local/global face i.e. iface_g = cell_face_ids[1:NELEM][1:NFACE_EL]
     
     mesh.conn_ho = reshape(mesh.conn_ho, mesh.npoin_el, mesh.nelem)
     if (mesh.nsd == 1)
@@ -275,7 +267,7 @@ populate_conn_face_el!(mesh)
 #Volume
 @time add_high_order_nodes_volumes!(mesh, lgl)
 
-#writevtk(model,"gmsh_grid")
+writevtk(model,"gmsh_grid")
 end
 
 function populate_conn_edge_el!(mesh::St_mesh)
@@ -340,7 +332,6 @@ function populate_conn_edge_el!(mesh::St_mesh)
     
 end #populate_edge_el!
 
-
 function populate_conn_face_el!(mesh::St_mesh)
     
     for iel = 1:mesh.nelem
@@ -400,38 +391,6 @@ function populate_conn_face_el!(mesh::St_mesh)
     end
     
 end #populate_face_el
-
-
-function populate_face_in_elem!(face_in_elem::Array{Int64, 3}, nelem, NFACES_EL, conn_face_el_sort::Array{Int64, 3})
-
-    iface = Int64(0)
-    for ifac = 1:NFACES_EL
-        for iel = 1:nelem	    
-	    for jfac = 1:NFACES_EL
-                for jel = iel:nelem
-		    
-		    if(     conn_face_el_sort[iel,ifac,1] === conn_face_el_sort[jel,jfac,1] && 
-			    conn_face_el_sort[iel,ifac,2] === conn_face_el_sort[jel,jfac,2] && 
-			    conn_face_el_sort[iel,ifac,3] === conn_face_el_sort[jel,jfac,3] && 
-			    conn_face_el_sort[iel,ifac,4] === conn_face_el_sort[jel,jfac,4] && 
-			    iel ≠ jel) 
-			
-			face_in_elem[1, ifac, iel] = iel
-			face_in_elem[2, ifac, iel] = jel
-			
-			face_in_elem[1, jfac, jel] = jel
-			face_in_elem[2, jfac, jel] = iel
-			
-			#@info " SHARED FACE:  face %d of ELEMENT %d is shared with face %d of ELEMENT %d - (%d %d %d %d) = (%d %d %d %d)\n", ifac+1,iel+1, jfac+1, jel+1, conn_face_el_sort[iel,ifac,1], conn_face_el_sort[iel,ifac,2], conn_face_el_sort[iel,ifac,3], conn_face_el_sort[iel,ifac,4],  conn_face_el_sort[jel,jfac,1], conn_face_el_sort[jel,jfac,2], conn_face_el_sort[jel,jfac,3], conn_face_el_sort[jel,jfac,4]
-			iface = iface + 1;
-		    end
-		end
-	    end
-	end
-    end     
-    nfaces_int = Int64(iface)
-    
-end
 
 function  add_high_order_nodes!(mesh::St_mesh) end
 
