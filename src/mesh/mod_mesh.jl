@@ -29,6 +29,9 @@ const VERTEX_NODES = UInt8(1)
 const EDGE_NODES   = UInt8(2)
 const FACE_NODES   = UInt8(4)
 
+abstract type At_geo_entity end
+
+
 include("../basis/basis_structs.jl")
 
 Base.@kwdef mutable struct St_mesh{TInt, TFloat}
